@@ -1,0 +1,77 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+// 부서 모델 (필터링용 - 참고용으로만 사용)
+model Department {
+  id     String  @id @default(uuid())
+  name   String  @unique
+  color  String  // 부서별 대표 색상 (HEX 코드)
+
+  @@map("departments")
+}
+
+// 사진 모델
+model Photo {
+  id             String   @id @default(uuid())
+  departmentName String   // 자유 입력 (Department 테이블과 연결 안 함)
+  title          String
+  description    String // 100자 제한
+  imageUrl       String
+  uploadDate     DateTime @default(now())
+  likeCount      Int      @default(0)
+  viewCount      Int      @default(0)
+  isTopPick      Boolean  @default(false) // 관리자 추천 여부
+
+  // Relations
+  comments   Comment[]
+  likes      Like[]
+
+  // Indexes for performance
+  @@index([likeCount])
+  @@index([uploadDate])
+  @@index([departmentName])
+  @@index([isTopPick])
+  @@map("photos")
+}
+
+// 댓글 모델
+model Comment {
+  id        String   @id @default(uuid())
+  photoId   String
+  nickname  String   // 익명 닉네임
+  content   String
+  createdAt DateTime @default(now())
+
+  // Relations
+  photo Photo @relation(fields: [photoId], references: [id], onDelete: Cascade)
+
+  @@index([photoId])
+  @@index([createdAt])
+  @@map("comments")
+}
+
+// 좋아요 모델 (IP 기반 중복 방지)
+model Like {
+  id        String   @id @default(uuid())
+  photoId   String
+  ip        String   // 사용자 IP 주소
+  createdAt DateTime @default(now())
+
+  // Relations
+  photo Photo @relation(fields: [photoId], references: [id], onDelete: Cascade)
+
+  // IP당 사진당 1개의 좋아요만 가능
+  @@unique([photoId, ip])
+  @@index([photoId])
+  @@index([ip])
+  @@map("likes")
+}
