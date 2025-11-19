@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef } from "react";
 import { motion } from "framer-motion";
 import { Heart, Eye, ArrowRight, Flame } from "lucide-react";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -49,6 +50,8 @@ const RANK_CONFIG = [
 
 export default function RealTimeHotBanner({ photos }: RealTimeHotBannerProps) {
   const topThree = photos.slice(0, 3);
+  const prevRef = useRef<HTMLButtonElement | null>(null);
+  const nextRef = useRef<HTMLButtonElement | null>(null);
 
   if (topThree.length === 0) return null;
 
@@ -159,6 +162,13 @@ export default function RealTimeHotBanner({ photos }: RealTimeHotBannerProps) {
             }}
             loop={topThree.length > 1}
             className="!pb-12"
+            onBeforeInit={(swiper) => {
+              const navigation = swiper.params.navigation;
+              if (navigation && typeof navigation !== "boolean") {
+                navigation.prevEl = prevRef.current;
+                navigation.nextEl = nextRef.current;
+              }
+            }}
             breakpoints={{
               0: {
                 coverflowEffect: {
@@ -239,8 +249,8 @@ export default function RealTimeHotBanner({ photos }: RealTimeHotBannerProps) {
                         </motion.div>
 
                         {/* 데스크톱 정보 오버레이 */}
-                        <div className="hidden md:flex absolute inset-0 flex-col justify-between p-6 bg-gradient-to-t from-black/80 via-black/40 to-transparent text-white">
-                          <div className="flex justify-between items-start">
+                        <div className="hidden md:flex absolute inset-0 flex-col justify-between p-6 bg-gradient-to-t from-black/85 via-black/40 to-transparent text-white pointer-events-none">
+                          <div className="flex justify-between items-start pointer-events-auto">
                             <motion.span
                               initial={{ y: 20, opacity: 0 }}
                               animate={{ y: 0, opacity: 1 }}
@@ -258,7 +268,7 @@ export default function RealTimeHotBanner({ photos }: RealTimeHotBannerProps) {
                             initial={{ y: 20, opacity: 0 }}
                             animate={{ y: 0, opacity: 1 }}
                             transition={{ delay: 0.5 + index * 0.1 }}
-                            className="space-y-4"
+                            className="space-y-4 pointer-events-auto"
                           >
                             <h3
                               className={cn(
@@ -270,7 +280,7 @@ export default function RealTimeHotBanner({ photos }: RealTimeHotBannerProps) {
                             </h3>
 
                             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                              <div className="flex gap-4 text-white text-base font-semibold">
+                              <div className="flex gap-4 text-white text-base font-semibold pointer-events-auto">
                                 <div className="flex items-center gap-2">
                                   <Heart className="w-5 h-5 text-red-500 fill-red-500" />
                                   <span>{photo.likeCount.toLocaleString()}</span>
@@ -284,7 +294,7 @@ export default function RealTimeHotBanner({ photos }: RealTimeHotBannerProps) {
                               <motion.button
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
-                                className="flex items-center justify-center gap-2 px-5 py-2 rounded-full bg-white/90 text-primary font-semibold shadow-md"
+                                className="flex items-center justify-center gap-2 px-5 py-2 rounded-full bg-white/95 text-primary font-semibold shadow-md pointer-events-auto"
                               >
                                 <span>자세히 보기</span>
                                 <ArrowRight className="w-4 h-4" />
@@ -408,6 +418,7 @@ export default function RealTimeHotBanner({ photos }: RealTimeHotBannerProps) {
 
           {/* 네비게이션 버튼 */}
           <button
+            ref={prevRef}
             className="swiper-button-prev-hot absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-30 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/90 dark:bg-black/70 backdrop-blur-md shadow-lg flex items-center justify-center hover:bg-white dark:hover:bg-black/80 transition-all pointer-events-auto"
             aria-label="이전"
           >
@@ -426,6 +437,7 @@ export default function RealTimeHotBanner({ photos }: RealTimeHotBannerProps) {
             </svg>
           </button>
           <button
+            ref={nextRef}
             className="swiper-button-next-hot absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-30 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/90 dark:bg-black/70 backdrop-blur-md shadow-lg flex items-center justify-center hover:bg-white dark:hover:bg-black/80 transition-all pointer-events-auto"
             aria-label="다음"
           >

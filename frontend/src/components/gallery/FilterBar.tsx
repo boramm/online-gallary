@@ -51,7 +51,7 @@ export default function FilterBar({
     <motion.div
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="sticky top-16 md:top-20 z-40 py-3 md:py-5 px-0 md:px-4 glass backdrop-blur-xl border-b border-border"
+      className="md:sticky md:top-20 z-40 py-3 md:py-5 px-0 md:px-4 glass backdrop-blur-xl border-b border-border"
     >
       <div className="container mx-auto max-w-6xl space-y-3 md:space-y-4">
         {/* 부서 필터 */}
