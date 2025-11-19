@@ -2,12 +2,14 @@
 
 import { useRef } from "react";
 import { motion } from "framer-motion";
-import { Heart, Eye, ArrowRight, Flame } from "lucide-react";
+import { Heart, Eye, ArrowRight, Flame, Calendar } from "lucide-react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, EffectCoverflow, Navigation } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/effect-coverflow";
 import "swiper/css/navigation";
+import Image from "next/image";
+import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 interface Photo {
@@ -18,6 +20,8 @@ interface Photo {
   departmentName: string;
   likeCount: number;
   viewCount: number;
+  description?: string;
+  uploadDate?: string;
 }
 
 interface RealTimeHotBannerProps {
@@ -203,213 +207,136 @@ export default function RealTimeHotBanner({ photos }: RealTimeHotBannerProps) {
                 className="!w-auto px-2"
                 style={{
                   width: isTopOne
-                    ? "min(640px, 90vw)"
-                    : "min(520px, 90vw)",
+                    ? "min(720px, 92vw)"
+                    : "min(600px, 92vw)",
                 }}
               >
                 <motion.div
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: index * 0.1 }}
-                  className="relative group"
+                  className={cn(
+                    "relative w-full max-w-[960px] mx-auto rounded-[32px] bg-gradient-to-br from-white/90 to-white/70 dark:from-slate-900/90 dark:to-slate-900/70 shadow-2xl overflow-hidden border border-white/30 dark:border-white/10 transition-all duration-300",
+                    config.glow
+                  )}
                 >
-                  {/* 카드 */}
-                  <div
-                    className={cn(
-                      "relative rounded-3xl overflow-hidden glass backdrop-blur-xl shadow-2xl transition-all duration-300 flex flex-col h-auto",
-                      config.glow
-                    )}
-                  >
-                    <div className="relative w-full">
-                      <div className="relative w-full aspect-[4/3] sm:aspect-video md:h-[420px] overflow-hidden bg-muted/10">
-                        {/* 이미지 */}
-                        <img
-                          src={photo.thumbnailUrl || photo.imageUrl}
-                          alt={photo.title}
-                          className="w-full h-full object-contain md:object-cover"
-                        />
+                  <div className="flex flex-col md:flex-row gap-6 md:gap-8 p-5 md:p-8">
+                    {/* 이미지 영역 */}
+                    <div className="relative flex-1 rounded-3xl overflow-hidden bg-black/80 min-h-[240px] md:min-h-[420px]">
+                      <Image
+                        src={photo.thumbnailUrl || photo.imageUrl}
+                        alt={photo.title}
+                        fill
+                        priority={index === 0}
+                        className="object-contain md:object-cover"
+                        sizes="(max-width: 768px) 90vw, (max-width: 1200px) 60vw, 600px"
+                      />
 
-                        {/* TOP 배지 - 우측 상단 */}
-                        <motion.div
-                          initial={{ scale: 0, rotate: -180 }}
-                          animate={{ scale: 1, rotate: 0 }}
-                          transition={{
-                            type: "spring",
-                            stiffness: 200,
-                            delay: 0.3 + index * 0.1,
-                          }}
-                          className={cn(
-                            "absolute top-4 right-4 px-5 py-2 rounded-2xl bg-gradient-to-r shadow-2xl flex items-center gap-2 text-white text-sm font-semibold",
-                            config.gradient,
-                            config.glow
-                          )}
-                        >
-                          <span className="text-xl">{config.emoji}</span>
-                          <span>{config.rank}</span>
-                        </motion.div>
-
-                        {/* 데스크톱 정보 오버레이 */}
-                        <div className="hidden md:flex absolute inset-0 flex-col justify-between p-6 bg-gradient-to-t from-black/85 via-black/40 to-transparent text-white pointer-events-none">
-                          <div className="flex justify-between items-start pointer-events-auto">
-                            <motion.span
-                              initial={{ y: 20, opacity: 0 }}
-                              animate={{ y: 0, opacity: 1 }}
-                              transition={{ delay: 0.4 + index * 0.1 }}
-                              className={cn(
-                                "inline-block px-4 py-1.5 rounded-full text-sm font-medium bg-gradient-to-r",
-                                config.gradient
-                              )}
-                            >
-                              {photo.departmentName}
-                            </motion.span>
-                          </div>
-
-                          <motion.div
-                            initial={{ y: 20, opacity: 0 }}
-                            animate={{ y: 0, opacity: 1 }}
-                            transition={{ delay: 0.5 + index * 0.1 }}
-                            className="space-y-4 pointer-events-auto"
-                          >
-                            <h3
-                              className={cn(
-                                "font-bold text-white line-clamp-2",
-                                isTopOne ? "text-3xl" : "text-2xl"
-                              )}
-                            >
-                              {photo.title}
-                            </h3>
-
-                            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                              <div className="flex gap-4 text-white text-base font-semibold pointer-events-auto">
-                                <div className="flex items-center gap-2">
-                                  <Heart className="w-5 h-5 text-red-500 fill-red-500" />
-                                  <span>{photo.likeCount.toLocaleString()}</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <Eye className="w-5 h-5 text-white" />
-                                  <span>{photo.viewCount.toLocaleString()}</span>
-                                </div>
-                              </div>
-
-                              <motion.button
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                                className="flex items-center justify-center gap-2 px-5 py-2 rounded-full bg-white/95 text-primary font-semibold shadow-md pointer-events-auto"
-                              >
-                                <span>자세히 보기</span>
-                                <ArrowRight className="w-4 h-4" />
-                              </motion.button>
-                            </div>
-                          </motion.div>
-                        </div>
-
-                        {/* 빛나는 효과 (TOP 1만) */}
-                        {isTopOne && (
-                          <motion.div
-                            className="absolute inset-0 pointer-events-none"
-                            animate={{
-                              background: [
-                                "radial-gradient(circle at 50% 50%, rgba(255, 200, 0, 0.25) 0%, transparent 50%)",
-                                "radial-gradient(circle at 50% 50%, rgba(255, 100, 0, 0.25) 0%, transparent 50%)",
-                                "radial-gradient(circle at 50% 50%, rgba(255, 200, 0, 0.25) 0%, transparent 50%)",
-                              ],
-                            }}
-                            transition={{
-                              duration: 2,
-                              repeat: Infinity,
-                            }}
-                          />
+                      {/* TOP 배지 */}
+                      <motion.div
+                        initial={{ scale: 0, rotate: -90 }}
+                        animate={{ scale: 1, rotate: 0 }}
+                        transition={{ delay: 0.2 }}
+                        className={cn(
+                          "absolute top-4 right-4 px-5 py-2 rounded-2xl text-white text-sm font-semibold flex items-center gap-2 shadow-xl",
+                          `bg-gradient-to-r ${config.gradient}`
                         )}
+                      >
+                        <span className="text-xl">{config.emoji}</span>
+                        {config.rank}
+                      </motion.div>
+
+                      {/* 데스크톱 하단 오버레이 */}
+                      <div className="hidden md:flex absolute inset-x-0 bottom-0 p-5 bg-gradient-to-t from-black/90 via-black/30 to-transparent text-white justify-between items-center gap-4">
+                        <div>
+                          <p className="text-sm text-white/70 mb-1">
+                            {photo.departmentName}
+                          </p>
+                          <h3
+                            className={cn(
+                              "font-bold",
+                              isTopOne ? "text-3xl" : "text-2xl"
+                            )}
+                          >
+                            {photo.title}
+                          </h3>
+                        </div>
+                        <div className="flex items-center gap-4 text-base font-semibold">
+                          <div className="flex items-center gap-2">
+                            <Heart className="w-5 h-5 text-red-400 fill-red-400" />
+                            {photo.likeCount.toLocaleString()}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Eye className="w-5 h-5 text-white" />
+                            {photo.viewCount.toLocaleString()}
+                          </div>
+                          <Link
+                            href={`/photo/${photo.id}`}
+                            className="inline-flex items-center gap-2 rounded-full bg-white/95 text-primary px-5 py-2 shadow-lg font-semibold whitespace-nowrap"
+                          >
+                            자세히 보기
+                            <ArrowRight className="w-4 h-4" />
+                          </Link>
+                        </div>
                       </div>
                     </div>
 
-                    {/* 모바일 정보 영역 */}
-                    <div className="md:hidden p-5 space-y-3 bg-white/95 dark:bg-black/70">
-                      <motion.span
-                        initial={{ y: 20, opacity: 0 }}
-                        animate={{ y: 0, opacity: 1 }}
-                        transition={{ delay: 0.4 + index * 0.1 }}
-                        className={cn(
-                          "inline-block px-4 py-1.5 rounded-full text-white text-sm font-medium bg-gradient-to-r",
-                          config.gradient
-                        )}
-                      >
-                        {photo.departmentName}
-                      </motion.span>
+                    {/* 정보 패널 */}
+                    <div className="w-full md:w-80 flex flex-col gap-5">
+                      <div className="flex flex-col gap-3">
+                        <span
+                          className={cn(
+                            "inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium text-white self-start",
+                            `bg-gradient-to-r ${config.gradient}`
+                          )}
+                        >
+                          <span className="w-2 h-2 rounded-full bg-white" />
+                          {photo.departmentName}
+                        </span>
+                        <h3 className="text-2xl font-bold">{photo.title}</h3>
+                        <p className="text-muted-foreground text-sm line-clamp-3">
+                          {photo.description || "설명이 등록되지 않았습니다."}
+                        </p>
+                      </div>
 
-                      <motion.h3
-                        initial={{ y: 20, opacity: 0 }}
-                        animate={{ y: 0, opacity: 1 }}
-                        transition={{ delay: 0.5 + index * 0.1 }}
-                        className="font-bold text-xl line-clamp-2"
-                      >
-                        {photo.title}
-                      </motion.h3>
+                      <div className="flex flex-wrap gap-4 text-sm font-semibold text-muted-foreground">
+                        <div className="flex items-center gap-2">
+                          <Heart className="w-5 h-5 text-red-500 fill-red-500" />
+                          {photo.likeCount.toLocaleString()} 좋아요
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Eye className="w-5 h-5 text-primary" />
+                          {photo.viewCount.toLocaleString()} 조회
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Calendar className="w-5 h-5 text-muted-foreground" />
+                          {photo.uploadDate
+                            ? new Date(photo.uploadDate).toLocaleDateString("ko-KR")
+                            : "업로드 예정"}
+                        </div>
+                      </div>
 
-                      <motion.div
-                        initial={{ y: 20, opacity: 0 }}
-                        animate={{ y: 0, opacity: 1 }}
-                        transition={{ delay: 0.6 + index * 0.1 }}
-                        className="flex flex-col gap-3"
-                      >
+                      <div className="md:hidden flex flex-col gap-3">
                         <div className="flex gap-4 text-sm font-semibold text-muted-foreground">
                           <div className="flex items-center gap-2">
                             <Heart className="w-5 h-5 text-red-500 fill-red-500" />
-                            <span>{photo.likeCount.toLocaleString()}</span>
+                            {photo.likeCount.toLocaleString()}
                           </div>
                           <div className="flex items-center gap-2">
                             <Eye className="w-5 h-5 text-primary" />
-                            <span>{photo.viewCount.toLocaleString()}</span>
+                            {photo.viewCount.toLocaleString()}
                           </div>
                         </div>
-
-                        <motion.button
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                          className="flex items-center justify-center gap-2 px-4 py-2 rounded-full bg-primary text-primary-foreground font-semibold shadow-md"
+                        <Link
+                          href={`/photo/${photo.id}`}
+                          className="flex items-center justify-center gap-2 rounded-full bg-primary text-primary-foreground px-4 py-3 font-semibold shadow-md"
                         >
-                          <span>자세히 보기</span>
+                          자세히 보기
                           <ArrowRight className="w-4 h-4" />
-                        </motion.button>
-                      </motion.div>
+                        </Link>
+                      </div>
                     </div>
                   </div>
-
-                  {/* 호버 글로우 */}
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    whileHover={{ opacity: 0.5 }}
-                    transition={{ duration: 0.3 }}
-                    className={cn(
-                      "absolute inset-0 pointer-events-none bg-gradient-to-r mix-blend-overlay",
-                      config.gradient
-                    )}
-                  />
-
-                  {/* 외부 글로우 효과 */}
-                  <motion.div
-                    animate={
-                      isTopOne
-                        ? {
-                            opacity: [0.3, 0.6, 0.3],
-                            scale: [1, 1.05, 1],
-                          }
-                        : {}
-                    }
-                    transition={
-                      isTopOne
-                        ? {
-                            duration: 2,
-                            repeat: Infinity,
-                          }
-                        : {}
-                    }
-                    className={cn(
-                      "absolute inset-0 rounded-3xl blur-2xl -z-10 bg-gradient-to-r",
-                      config.gradient,
-                      config.glow
-                    )}
-                  />
                 </motion.div>
               </SwiperSlide>
             );
