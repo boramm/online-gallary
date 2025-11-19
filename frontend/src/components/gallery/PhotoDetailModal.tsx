@@ -70,7 +70,7 @@ export default function PhotoDetailModal({
   const loadComments = async (photoId: string) => {
     try {
       const response = await fetch(
-        `http://localhost:3001/comments/photo/${photoId}`
+        `${process.env.NEXT_PUBLIC_API_URL}/comments/photo/${photoId}`
       );
       if (response.ok) {
         const data = await response.json();
