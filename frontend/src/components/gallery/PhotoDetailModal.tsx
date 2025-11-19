@@ -1,15 +1,8 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  X,
-  Eye,
-  Calendar,
-  Share2,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
+import { X, Eye, Calendar, Share2, ChevronLeft, ChevronRight } from "lucide-react";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import CommentSection from "./CommentSection";
 import LikeButton from "@/components/ui/LikeButton";
@@ -46,6 +39,8 @@ interface PhotoDetailModalProps {
   onNavigate?: (photoId: string) => void;
 }
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL;
+
 export default function PhotoDetailModal({
   photo,
   isOpen,
@@ -56,28 +51,39 @@ export default function PhotoDetailModal({
   const [currentLikeCount, setCurrentLikeCount] = useState(0);
   const [isImageLoading, setIsImageLoading] = useState(true);
   const [comments, setComments] = useState<Comment[]>([]);
+  const [isCommentLoading, setIsCommentLoading] = useState(false);
+
+  const formattedDate = useMemo(() => {
+    if (!photo?.uploadDate) return "업로드 예정";
+    return new Date(photo.uploadDate).toLocaleDateString("ko-KR");
+  }, [photo?.uploadDate]);
 
   useEffect(() => {
     if (photo) {
       setCurrentLikeCount(photo.likeCount);
       setIsImageLoading(true);
-      // 댓글 로드
+      setComments(photo.comments || []);
       loadComments(photo.id);
     }
   }, [photo]);
 
   // 댓글 로드
   const loadComments = async (photoId: string) => {
+    if (!API_BASE) return;
+    setIsCommentLoading(true);
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/comments/photo/${photoId}`
-      );
+      const response = await fetch(`${API_BASE}/comments/photo/${photoId}`, {
+        cache: "no-store",
+      });
       if (response.ok) {
-        const data = await response.json();
-        setComments(data);
+        const payload = await response.json();
+        const list = Array.isArray(payload) ? payload : payload.data ?? [];
+        setComments(list);
       }
     } catch (error) {
       console.error("댓글 로드 실패:", error);
+    } finally {
+      setIsCommentLoading(false);
     }
   };
 
@@ -142,7 +148,7 @@ export default function PhotoDetailModal({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
-          className="fixed inset-0 z-[100] flex items-center justify-center"
+          className="fixed inset-0 z-[100] flex items-center justify-center px-4 py-6"
           onClick={onClose}
         >
           {/* 블러 배경 */}
@@ -154,135 +160,93 @@ export default function PhotoDetailModal({
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.9, opacity: 0 }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
-          className="relative w-full h-full md:w-[95vw] md:h-[90vh] md:max-w-7xl bg-background md:rounded-2xl shadow-2xl overflow-hidden flex flex-col md:flex-row"
-          onClick={(e) => e.stopPropagation()}
-        >
-            {/* 좌측: 이미지 영역 (Instagram 스타일) */}
-            <div className="flex-1 bg-black relative min-h-[40vh] md:min-h-0 flex items-center justify-center">
-              <TransformWrapper
-                initialScale={1}
-                minScale={0.5}
-                maxScale={3}
-                centerOnInit
-              >
-                <TransformComponent
-                  wrapperClass="w-full h-full"
-                  contentClass="w-full h-full flex items-center justify-center"
-                >
-                  <div className="relative">
-                    {/* 이미지 로딩 Shimmer */}
+            className="relative w-full max-w-5xl max-h-[90vh] bg-background text-foreground md:rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* 좌측: 이미지 영역 */}
+            <div className="flex-1 bg-black flex items-center justify-center relative">
+              <TransformWrapper initialScale={1} minScale={0.6} maxScale={3}>
+                <TransformComponent wrapperClass="w-full h-full" contentClass="w-full h-full flex items-center justify-center">
+                  <div className="relative w-full h-full flex items-center justify-center">
                     {isImageLoading && (
                       <div className="absolute inset-0 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 animate-shimmer" />
                     )}
                     <img
                       src={photo.imageUrl}
                       alt={photo.title}
-                      className="max-w-full max-h-[90vh] object-contain"
+                      className="max-h-[80vh] w-auto object-contain"
                       onLoad={() => setIsImageLoading(false)}
                     />
                   </div>
                 </TransformComponent>
               </TransformWrapper>
-
-              {/* 확대/축소 안내 */}
-              <div className="absolute bottom-4 left-4 text-white/60 text-sm">
-                마우스 휠로 확대/축소, 드래그로 이동
+              <div className="absolute bottom-3 left-4 text-white/60 text-xs md:text-sm">
+                스크롤로 확대/축소 · 드래그로 이동
               </div>
             </div>
 
             {/* 우측: 정보 패널 */}
-            <div className="w-full md:w-96 flex flex-col bg-background max-h-[60vh] md:max-h-none overflow-y-auto md:overflow-visible">
-              {/* 헤더 */}
-              <div className="p-6 border-b border-border">
-                {/* 부서 배지 */}
-                <motion.div
-                  initial={{ x: 20, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  transition={{ delay: 0.1 }}
-                  className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-white text-sm font-medium mb-3"
-                  style={{
-                    backgroundColor:
-                      photo.department?.color || "#6B7280",
-                  }}
+            <div className="w-full md:w-[360px] bg-background border-t md:border-t-0 md:border-l border-border flex flex-col overflow-hidden">
+              <div className="p-5 border-b border-border space-y-3">
+                <span
+                  className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-white text-sm font-medium"
+                  style={{ backgroundColor: photo.department?.color || "#6B7280" }}
                 >
-                  <div
-                    className="w-2 h-2 rounded-full bg-white animate-pulse"
-                  />
+                  <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
                   {photo.departmentName}
-                </motion.div>
-
-                {/* 제목 */}
-                <motion.h2
-                  initial={{ x: 20, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  transition={{ delay: 0.2 }}
-                  className="text-2xl font-bold mb-2"
-                >
-                  {photo.title}
-                </motion.h2>
-
-                {/* 설명 */}
-                <motion.p
-                  initial={{ x: 20, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  transition={{ delay: 0.3 }}
-                  className="text-muted-foreground"
-                >
-                  {photo.description}
-                </motion.p>
+                </span>
+                <h2 className="text-2xl font-bold">{photo.title}</h2>
+                <p className="text-sm text-muted-foreground whitespace-pre-line">
+                  {photo.description || "등록된 설명이 없습니다."}
+                </p>
               </div>
 
-              {/* 통계 & 액션 */}
-              <div className="p-6 border-b border-border">
-                <div className="flex items-center justify-between mb-4">
-                  {/* 통계 */}
-                  <div className="flex gap-4 text-sm">
-                    <div className="flex items-center gap-1.5 text-muted-foreground">
-                      <Eye className="w-4 h-4" />
-                      <span>{photo.viewCount.toLocaleString()}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 text-muted-foreground">
-                      <Calendar className="w-4 h-4" />
-                      <span>
-                        {new Date(photo.uploadDate).toLocaleDateString("ko-KR")}
-                      </span>
-                    </div>
+              <div className="p-5 border-b border-border space-y-4">
+                <div className="flex gap-4 text-sm text-muted-foreground">
+                  <div className="flex items-center gap-1.5">
+                    <Eye className="w-4 h-4" />
+                    {photo.viewCount.toLocaleString()} 조회
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <Calendar className="w-4 h-4" />
+                    {formattedDate}
                   </div>
                 </div>
 
-              {/* 액션 버튼 */}
-              <div className="flex gap-2">
-                {/* 좋아요 버튼 */}
-                <div className="flex-1 flex items-center justify-center px-4 py-3 rounded-xl glass">
-                  <LikeButton
-                    photoId={photo.id}
-                    initialLikeCount={currentLikeCount}
-                    size="md"
-                    showCount={true}
-                    onLikeChange={handleLikeChange}
-                  />
+                <div className="flex gap-3">
+                  <div className="flex-1 flex items-center justify-center px-4 py-3 rounded-xl glass">
+                    <LikeButton
+                      photoId={photo.id}
+                      initialLikeCount={currentLikeCount}
+                      size="md"
+                      showCount
+                      onLikeChange={handleLikeChange}
+                    />
+                  </div>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={handleShare}
+                    className="px-4 py-3 rounded-xl glass hover:bg-accent/10 transition-all"
+                  >
+                    <Share2 className="w-5 h-5" />
+                  </motion.button>
                 </div>
-
-                {/* 공유 버튼 */}
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={handleShare}
-                  className="px-4 py-3 rounded-xl glass hover:bg-accent/10 transition-all"
-                >
-                  <Share2 className="w-5 h-5" />
-                </motion.button>
-              </div>
               </div>
 
               {/* 댓글 섹션 */}
-              {photo && (
+              <div className="flex-1 overflow-y-auto">
                 <CommentSection
                   photoId={photo.id}
                   comments={comments}
                   onCommentAdded={handleCommentAdded}
                 />
-              )}
+                {isCommentLoading && (
+                  <p className="text-center text-xs text-muted-foreground pb-4">
+                    댓글을 가져오는 중입니다...
+                  </p>
+                )}
+              </div>
             </div>
 
             {/* 우상단: 닫기 버튼 */}
