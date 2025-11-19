@@ -51,11 +51,11 @@ export default function FilterBar({
     <motion.div
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="md:sticky md:top-20 z-40 py-4 md:py-6 px-0 md:px-4 glass backdrop-blur-xl border-b border-border"
+      className="sticky top-16 md:top-20 z-40 py-3 md:py-4 lg:py-6 px-0 md:px-4 glass backdrop-blur-xl border-b border-border"
     >
-      <div className="container mx-auto max-w-6xl space-y-4">
+      <div className="container mx-auto max-w-6xl space-y-3 md:space-y-4">
         {/* 부서 필터 */}
-        <div className="flex gap-2 overflow-x-auto scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0 md:flex-wrap md:overflow-visible">
+        <div className="flex gap-2 overflow-x-auto scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0 md:flex-wrap md:overflow-visible pb-2 md:pb-0">
           {departmentsWithColors.map((dept) => {
             const isSelected = selectedDepartment === dept.name;
             return (
@@ -64,7 +64,7 @@ export default function FilterBar({
                 onClick={() => onDepartmentChange(dept.name)}
                 whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.95 }}
-                className={`shrink-0 px-4 py-2 rounded-full font-medium transition-all ${
+                className={`shrink-0 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full font-medium transition-all text-sm sm:text-base whitespace-nowrap ${
                   isSelected ? "text-white shadow-lg" : "glass hover:shadow-md"
                 }`}
                 style={{
@@ -96,7 +96,7 @@ export default function FilterBar({
         </div>
 
         {/* 검색 & 정렬 */}
-        <div className="flex flex-col md:flex-row gap-4 px-4 md:px-0">
+        <div className="flex flex-col md:flex-row gap-3 md:gap-4 px-4 md:px-0">
           {/* 검색창 */}
           <div className="flex-1 relative">
             <motion.div
@@ -191,7 +191,7 @@ export default function FilterBar({
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="flex items-center gap-2 text-sm text-muted-foreground"
+            className="flex flex-wrap items-center gap-2 text-xs sm:text-sm text-muted-foreground px-4 md:px-0"
           >
             <span>활성 필터:</span>
             {selectedDepartment !== "전체" && (

@@ -3,9 +3,10 @@
 import { motion } from "framer-motion";
 import { Heart, Eye, ArrowRight, Flame } from "lucide-react";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Autoplay, EffectCoverflow } from "swiper/modules";
+import { Autoplay, EffectCoverflow, Navigation } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/effect-coverflow";
+import "swiper/css/navigation";
 import { cn } from "@/lib/utils";
 
 interface Photo {
@@ -134,26 +135,54 @@ export default function RealTimeHotBanner({ photos }: RealTimeHotBannerProps) {
         </motion.div>
 
         {/* Swiper */}
-        <Swiper
-          modules={[Autoplay, EffectCoverflow]}
-          effect="coverflow"
-          grabCursor={true}
-          centeredSlides={true}
-          slidesPerView="auto"
-          coverflowEffect={{
-            rotate: 50,
-            stretch: 0,
-            depth: 100,
-            modifier: 1,
-            slideShadows: true,
-          }}
-          autoplay={{
-            delay: 5000,
-            disableOnInteraction: false,
-          }}
-          loop={topThree.length > 1}
-          className="!pb-12"
-        >
+        <div className="relative">
+          <Swiper
+            modules={[Autoplay, EffectCoverflow, Navigation]}
+            effect="coverflow"
+            grabCursor={true}
+            centeredSlides={true}
+            slidesPerView="auto"
+            navigation={{
+              nextEl: ".swiper-button-next-hot",
+              prevEl: ".swiper-button-prev-hot",
+            }}
+            coverflowEffect={{
+              rotate: 50,
+              stretch: 0,
+              depth: 100,
+              modifier: 1,
+              slideShadows: true,
+            }}
+            autoplay={{
+              delay: 5000,
+              disableOnInteraction: false,
+            }}
+            loop={topThree.length > 1}
+            className="!pb-12"
+            breakpoints={{
+              0: {
+                coverflowEffect: {
+                  rotate: 0,
+                  stretch: 0,
+                  depth: 0,
+                },
+              },
+              768: {
+                coverflowEffect: {
+                  rotate: 30,
+                  stretch: 0,
+                  depth: 50,
+                },
+              },
+              1024: {
+                coverflowEffect: {
+                  rotate: 50,
+                  stretch: 0,
+                  depth: 100,
+                },
+              },
+            }}
+          >
           {topThree.map((photo, index) => {
             const config = RANK_CONFIG[index];
             const isTopOne = index === 0;
@@ -181,12 +210,12 @@ export default function RealTimeHotBanner({ photos }: RealTimeHotBannerProps) {
                       config.glow
                     )}
                   >
-                    <div className="relative w-full aspect-[4/3] sm:aspect-video overflow-hidden">
+                    <div className="relative w-full aspect-[4/3] sm:aspect-video md:aspect-[16/9] overflow-hidden bg-muted/20">
                       {/* 이미지 */}
                       <img
                         src={photo.thumbnailUrl || photo.imageUrl}
                         alt={photo.title}
-                        className="w-full h-full object-contain sm:object-cover"
+                        className="w-full h-full object-contain"
                       />
 
                       {/* TOP 배지 - 우측 상단 */}
@@ -259,19 +288,19 @@ export default function RealTimeHotBanner({ photos }: RealTimeHotBannerProps) {
                         initial={{ y: 20, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
                         transition={{ delay: 0.6 + index * 0.1 }}
-                        className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
+                        className="flex flex-col gap-3 sm:gap-4 sm:flex-row sm:items-center sm:justify-between"
                       >
                         {/* 통계 */}
-                        <div className="flex gap-4 text-sm font-semibold text-muted-foreground dark:text-white/80">
+                        <div className="flex gap-3 sm:gap-4 text-sm font-semibold text-muted-foreground dark:text-white/80 flex-shrink-0">
                           <div className="flex items-center gap-2">
-                            <Heart className="w-5 h-5 text-red-500 fill-red-500" />
-                            <span className="text-base sm:text-lg">
+                            <Heart className="w-4 h-4 sm:w-5 sm:h-5 text-red-500 fill-red-500 flex-shrink-0" />
+                            <span className="text-sm sm:text-base md:text-lg whitespace-nowrap">
                               {photo.likeCount.toLocaleString()}
                             </span>
                           </div>
                           <div className="flex items-center gap-2">
-                            <Eye className="w-5 h-5 text-primary" />
-                            <span className="text-base sm:text-lg">
+                            <Eye className="w-4 h-4 sm:w-5 sm:h-5 text-primary flex-shrink-0" />
+                            <span className="text-sm sm:text-base md:text-lg whitespace-nowrap">
                               {photo.viewCount.toLocaleString()}
                             </span>
                           </div>
@@ -281,10 +310,10 @@ export default function RealTimeHotBanner({ photos }: RealTimeHotBannerProps) {
                         <motion.button
                           whileHover={{ scale: 1.05, x: 5 }}
                           whileTap={{ scale: 0.95 }}
-                          className="flex items-center justify-center gap-2 px-5 py-2 rounded-full bg-primary text-primary-foreground font-semibold shadow-md"
+                          className="flex items-center justify-center gap-2 px-4 py-2 sm:px-5 sm:py-2 rounded-full bg-primary text-primary-foreground font-semibold shadow-md text-sm sm:text-base whitespace-nowrap flex-shrink-0"
                         >
                           <span>자세히 보기</span>
-                          <ArrowRight className="w-4 h-4" />
+                          <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4" />
                         </motion.button>
                       </motion.div>
                     </div>
@@ -329,7 +358,46 @@ export default function RealTimeHotBanner({ photos }: RealTimeHotBannerProps) {
               </SwiperSlide>
             );
           })}
-        </Swiper>
+          </Swiper>
+          
+          {/* 네비게이션 버튼 */}
+          <button
+            className="swiper-button-prev-hot absolute left-2 md:left-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/90 dark:bg-black/60 backdrop-blur-md shadow-lg flex items-center justify-center hover:bg-white dark:hover:bg-black/80 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+            aria-label="이전"
+          >
+            <svg
+              className="w-5 h-5 md:w-6 md:h-6 text-primary"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
+            </svg>
+          </button>
+          <button
+            className="swiper-button-next-hot absolute right-2 md:right-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/90 dark:bg-black/60 backdrop-blur-md shadow-lg flex items-center justify-center hover:bg-white dark:hover:bg-black/80 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+            aria-label="다음"
+          >
+            <svg
+              className="w-5 h-5 md:w-6 md:h-6 text-primary"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 5l7 7-7 7"
+              />
+            </svg>
+          </button>
+        </div>
 
         {/* 하단 안내 문구 */}
         <motion.div
