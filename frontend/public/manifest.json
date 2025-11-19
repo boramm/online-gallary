@@ -1,0 +1,27 @@
+{
+  "name": "시선이 있는날 - 온라인 갤러리",
+  "short_name": "시선이 있는날",
+  "description": "부서별 사진을 공유하고 소통하는 온라인 갤러리",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1E40AF",
+  "theme_color": "#1E40AF",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["photo", "social", "entertainment"],
+  "lang": "ko-KR"
+}
+
