@@ -120,7 +120,7 @@ export default function UploadPage() {
         });
       }, 200);
 
-      const response = await fetch("http://localhost:3001/photos", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/photos`, {
         method: "POST",
         body: formData,
       });

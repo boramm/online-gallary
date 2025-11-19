@@ -70,7 +70,7 @@ export default function CommentSection({
     setError("");
 
     try {
-      const response = await fetch("http://localhost:3001/comments", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/comments`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

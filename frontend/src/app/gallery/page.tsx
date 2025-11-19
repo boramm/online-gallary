@@ -115,7 +115,7 @@ function GalleryPageContent() {
   // 부서 목록 로드
   const loadDepartments = async () => {
     try {
-      const response = await fetch("http://localhost:3001/photos/departments");
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/photos/departments`);
       if (response.ok) {
         const result = await response.json();
         setDepartments(result.data || []);
@@ -129,7 +129,7 @@ function GalleryPageContent() {
     try {
       // TOP 3 로드
       const topResponse = await fetch(
-        "http://localhost:3001/photos?page=1&limit=3"
+        `${process.env.NEXT_PUBLIC_API_URL}/photos?page=1&limit=3`
       );
       if (topResponse.ok) {
         const topResult = await topResponse.json();
@@ -162,7 +162,7 @@ function GalleryPageContent() {
       // params.append("sortBy", sortBy);
 
       const response = await fetch(
-        `http://localhost:3001/photos?${params.toString()}`
+        `${process.env.NEXT_PUBLIC_API_URL}/photos?${params.toString()}`
       );
 
       if (response.ok) {
